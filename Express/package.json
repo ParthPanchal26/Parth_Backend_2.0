@@ -1,0 +1,17 @@
+{
+  "name": "express_backend",
+  "version": "1.0.0",
+  "description": "ExpressJs backend practice",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "nodemon index.js"
+  },
+  "author": "parth panchal",
+  "license": "ISC",
+  "dependencies": {
+    "ejs": "^3.1.10",
+    "express": "^4.19.2",
+    "nodemon": "^3.1.4"
+  }
+}
