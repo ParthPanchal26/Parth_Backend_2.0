@@ -1,5 +1,24 @@
+import { timeStamp } from 'console';
 import express from 'express';
+import mongoose from 'mongoose';
 import path from 'path';
+
+mongoose.connect("mongodb://localhost:27017/", {
+    dbName: "Parth_Backend_2_0",
+})
+.then(() => {
+    console.log("Database connected!");
+})
+.catch((err) => {
+    console.log("DB connection Error: : " + err);
+})
+
+const userSchema = mongoose.Schema({
+    username: String,
+    email: String,
+}, {timeStamp: true});
+
+const User = mongoose.model("User", userSchema);
 
 const app = express();
 
@@ -53,8 +72,9 @@ app.get("/users", (req, res) => {
     })
 })
 
-app.post('/contact', (req, res) => {
-    users.push({ userName: req.body.name, email: req.body.email });
+app.post('/contact', async (req, res) => {
+    const {username, email} = req.body;
+    await User.create({ username, email });
     res.redirect("/success");
 })
 
