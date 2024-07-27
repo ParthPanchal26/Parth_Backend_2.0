@@ -1,22 +1,24 @@
-import { timeStamp } from 'console';
 import express from 'express';
 import mongoose from 'mongoose';
 import path from 'path';
+import cookieparser from "cookie-parser"
+import jwt from 'jsonwebtoken'
 
 mongoose.connect("mongodb://localhost:27017/", {
     dbName: "Parth_Backend_2_0",
 })
-.then(() => {
-    console.log("Database connected!");
-})
-.catch((err) => {
-    console.log("DB connection Error: : " + err);
-})
+    .then(() => {
+        console.log("Database connected!");
+    })
+    .catch((err) => {
+        console.log("DB connection Error: : " + err);
+    })
 
 const userSchema = mongoose.Schema({
     username: String,
     email: String,
-}, {timeStamp: true});
+    password: String,
+}, { timeStamp: true });
 
 const User = mongoose.model("User", userSchema);
 
@@ -25,10 +27,21 @@ const app = express();
 app.set("view engine", "ejs");
 app.use(express.static(path.join(path.resolve(), './public')));
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieparser());
 
-let users = [];
+const isAuthenticated = async (req, res, next) => {
 
-app.get('', (req, res) => {
+    const { id } = req.cookies;
+    if (id) {
+        const decodedUserId = jwt.verify(id, "YUIF5CRyu6R96N4FU4865NFHDJFJKjh7nyecufn4uff");
+        req.user = await User.findById(decodedUserId._id)
+        next();
+    }
+    res.render("login.ejs");
+
+}
+
+app.get('/', isAuthenticated, (req, res) => {
     // 1.Sending StatusCode
     // res.sendStatus(200);
 
@@ -54,28 +67,42 @@ app.get('', (req, res) => {
     // this functionality using html templates, There are so many of them available
     // but we will use 'ejs'.
     // res.render("index.ejs", {name: "Parth"});
-    res.render("index.ejs");
+    // console.log(req.cookies);
+
 
     // 6. TO render html, css files we can have a static folder name 'public'.
     //  To access those files we have express.static(). As this is a middleware we need
     // 'use()' method.
+    res.render("logout.ejs", {username: req.user.username});
 
 });
 
-app.get("/success", (req, res) => {
-    res.render("success.ejs");
-})
+app.post("/login", async (req, res) => {
 
-app.get("/users", (req, res) => {
-    res.json({
-        users,
+    const { username, email, password } = req.body;
+
+    const user = await User.create({
+        username,
+        email,
+        password
     })
+
+    const token = jwt.sign({ _id: user._id }, "YUIF5CRyu6R96N4FU4865NFHDJFJKjh7nyecufn4uff")
+    res.cookie("id", token, {
+        httpOnly: true,
+        expires: new Date(Date.now() + 300 * 1000)
+    });
+
+    res.redirect('/')
 })
 
-app.post('/contact', async (req, res) => {
-    const {username, email} = req.body;
-    await User.create({ username, email });
-    res.redirect("/success");
+app.get("/logout", (req, res) => {
+
+    res.cookie("id", null, {
+        expires: new Date(Date.now())
+    });
+
+    res.redirect('/')
 })
 
 app.listen(3000, () => {
