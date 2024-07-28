@@ -31,13 +31,14 @@ app.use(cookieparser());
 
 const isAuthenticated = async (req, res, next) => {
 
-    const { id } = req.cookies;
-    if (id) {
-        const decodedUserId = jwt.verify(id, "YUIF5CRyu6R96N4FU4865NFHDJFJKjh7nyecufn4uff");
+    const { token } = req.cookies;
+    if (token) {
+        const decodedUserId = jwt.verify(token, "YUIF5CRyu6R96N4FU4865NFHDJFJKjh7nyecufn4uff");
         req.user = await User.findById(decodedUserId._id)
-        next();
+        req.user && next();
+    } else {
+        res.render("login.ejs");
     }
-    res.render("login.ejs");
 
 }
 
@@ -71,9 +72,9 @@ app.get('/', isAuthenticated, (req, res) => {
 
 
     // 6. TO render html, css files we can have a static folder name 'public'.
-    //  To access those files we have express.static(). As this is a middleware we need
+    //  To access those files we have express.static(). As this is a mtokendleware we need
     // 'use()' method.
-    res.render("logout.ejs", {username: req.user.username});
+    res.render("logout.ejs", { username: req.user.username });
 
 });
 
@@ -88,17 +89,16 @@ app.post("/login", async (req, res) => {
     })
 
     const token = jwt.sign({ _id: user._id }, "YUIF5CRyu6R96N4FU4865NFHDJFJKjh7nyecufn4uff")
-    res.cookie("id", token, {
+    res.cookie("token", token, {
         httpOnly: true,
         expires: new Date(Date.now() + 300 * 1000)
-    });
+    }).status(201).redirect('/')
 
-    res.redirect('/')
 })
 
 app.get("/logout", (req, res) => {
 
-    res.cookie("id", null, {
+    res.cookie("token", null, {
         expires: new Date(Date.now())
     });
 
