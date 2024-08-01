@@ -25,10 +25,12 @@ const PORT = 3000;
 
 app.use(express.json());
 
+// Empty route GET API
 app.get('/', (req, res) => {
     res.send("Server is running!");
 });
 
+// Data creating POST API
 app.post('/users/new', async (req, res) => {
 
     const { username, email, password } = req.body;
@@ -45,7 +47,12 @@ app.post('/users/new', async (req, res) => {
     });
 })
 
+// Data retrieval GET API
 app.get('/users/all', async (req, res) => {
+
+    // Fetching Parameters from URL
+    // const ulrParametersObject = req.query;
+    // console.log(ulrParametersObject);
 
     const userScope = await User.find({});
 
@@ -54,6 +61,24 @@ app.get('/users/all', async (req, res) => {
         userScope,
     })
 });
+
+// Static route with same previous path
+app.get('/userid/special', (req, res) => {
+    res.json({
+        success: true,
+        message: "Static route called!",
+    })
+})
+
+// Dynamic route to fetch parameters from url
+app.get('/userid/:id', async (req, res) => {
+    const { id } = req.params;
+    const user = await User.findById(id);
+    res.json({
+        success: true,
+        user,
+    })
+})
 
 app.listen(PORT, (req, res) => {
     console.log(`Server listening on http://localhost:${PORT}/`);
