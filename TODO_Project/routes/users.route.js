@@ -1,14 +1,15 @@
 import express from 'express'
-import { getAllUsers, getParam, register, login } from '../controllers/users.controller.js';
+import { register, login, getMyProfile, logout } from '../controllers/users.controller.js';
+import { isAuthenticated } from '../middlewares/auth.middleware.js';
 
 const router = express.Router();
 
 router.post('/new', register)
 
-router.post('/login', login);
+router.post('/login',  login);
 
-router.get('/all', getAllUsers);
+router.get('/logout',  logout);
 
-router.route('/userid/:id').get(getParam)
+router.get('/me', isAuthenticated, getMyProfile)
 
 export default router;

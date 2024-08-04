@@ -1,9 +1,6 @@
 import { User } from "../models/users.model.js";
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
 import { sendToken } from "../utils/sendToken.utils.js";
-
-export const getAllUsers = async (req, res) => { }
 
 export const register = async (req, res) => {
 
@@ -31,7 +28,7 @@ export const register = async (req, res) => {
 }
 
 export const login = async (req, res) => {
-    
+
     const { email, password } = req.body;
 
     const user = await User.findOne({
@@ -54,4 +51,22 @@ export const login = async (req, res) => {
 
 }
 
-export const getParam = async (req, res) => { }
+export const logout = (req, res) => {
+
+    res.status(200).cookie("token", "", {
+        expires: new Date(Date.now()),
+    }).json({
+        success: true,
+        message: "User deleted!",
+    })
+
+}
+
+export const getMyProfile = (req, res) => {
+
+    res.status(200).json({
+        success: true,
+        user: req.user,
+    });
+
+}

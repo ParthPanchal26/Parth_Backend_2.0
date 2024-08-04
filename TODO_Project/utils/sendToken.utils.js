@@ -11,5 +11,4 @@ export const sendToken = (user, res, statusCode=200, message) => {
         success: true,
         message,
     })
-
 }

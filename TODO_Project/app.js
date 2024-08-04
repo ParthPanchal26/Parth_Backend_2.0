@@ -1,6 +1,7 @@
-import express, { json } from 'express';
+import express from 'express';
 import {config} from 'dotenv';
 import userRouter from './routes/users.route.js';
+import cookieParser from 'cookie-parser';
 
 export const app = express();
 
@@ -8,8 +9,21 @@ config({
     path: "./config/config.env"
 });
 
-app.use(json());
-app.use("/api/v1/users" ,userRouter);
+app.use(express.json());
+
+// Initial order ...
+/*
+ app.use("/api/v1/users", userRouter);
+ app.use(cookieParser()); 
+*/
+// In this initial order, the cookieParser middleware is defined after the route
+// for /api/v1/users. This means that when a request is made to any endpoint under
+// /api/v1/users, the cookieParser middleware is not executed before the route handlers,
+// and req.cookies remains undefined.
+
+// Correct order ...
+app.use(cookieParser());
+app.use("/api/v1/users", userRouter);
 
 // Empty route GET API
 app.get('/', (req, res) => {
