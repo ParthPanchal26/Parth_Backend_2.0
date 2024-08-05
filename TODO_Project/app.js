@@ -1,6 +1,7 @@
 import express from 'express';
 import {config} from 'dotenv';
 import userRouter from './routes/users.route.js';
+import taskRouter from './routes/tasks.route.js';
 import cookieParser from 'cookie-parser';
 
 export const app = express();
@@ -24,6 +25,7 @@ app.use(express.json());
 // Correct order ...
 app.use(cookieParser());
 app.use("/api/v1/users", userRouter);
+app.use("/api/v1/tasks", taskRouter);
 
 // Empty route GET API
 app.get('/', (req, res) => {
