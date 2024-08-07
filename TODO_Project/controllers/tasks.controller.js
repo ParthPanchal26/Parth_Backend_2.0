@@ -1,71 +1,98 @@
+import errorHandler from '../middlewares/error.middleware.js';
 import { Task } from '../models/tasks.model.js'
 
 export const newTask = async (req, res, next) => {
 
-    const { title, description } = req.body;
+    try {
 
-    await Task.create({
-        title,
-        description,
-        user: req.user,
-    })
+        const { title, description } = req.body;
 
-    res.status(201).json({
-        success: true,
-        message: "Task created!",
-    })
+        await Task.create({
+            title,
+            description,
+            user: req.user,
+        })
 
-}
+        res.status(201).json({
+            success: true,
+            message: "Task created!",
+        })
 
-export const getMyTask = async (req, res) => {
+    } catch (error) {
 
-    const userID = req.user._id;
+        next(error)
 
-    const tasks = await Task.find({
-        user: userID
-    });
-
-    res.status(200).json({
-        success: true,
-        tasks,
-    })
+    }
 
 }
 
-export const updateTask = async (req, res) => {
+export const getMyTask = async (req, res, next) => {
 
-    const task = await Task.findById(req.params.id);
+    try {
 
-    if (!task) return res.status(404).json({
-        success: false,
-        message: "Inavalid Id!",
-    })
+        const userID = req.user._id;
 
-    task.isCompleted = !task.isCompleted;
+        const tasks = await Task.find({
+            user: userID
+        });
 
-    await task.save();
+        res.status(200).json({
+            success: true,
+            tasks,
+        })
 
-    res.status(200).json({
-        success: true,
-        message: "Task updated!",
-    })
+    } catch (error) {
+
+        next(error)
+
+    }
 
 }
 
-export const deleteTask = async (req, res) => {
+export const updateTask = async (req, res, next) => {
 
-    const task = await Task.findById(req.params.id);
+    try {
 
-    if (!task) return res.status(404).json({
-        success: false,
-        message: "Inavalid Id!",
-    })
+        const task = await Task.findById(req.params.id);
 
-    await task.deleteOne();
+        if (!task) return next(new errorHandler("Task not found", 404))
 
-    res.status(200).json({
-        success: true,
-        message: "Task deleted!",
-    })
+        task.isCompleted = !task.isCompleted;
+
+        await task.save();
+
+        res.status(200).json({
+            success: true,
+            message: "Task updated!",
+        })
+
+    } catch (error) {
+
+        next(error)
+
+    }
+
+}
+
+export const deleteTask = async (req, res, next) => {
+
+    try {
+
+        const task = await Task.findById(req.params.id);
+
+        if (!task) return next(new errorHandler("Task not found", 404))
+
+        await task.deleteOne();
+
+        res.status(200).json({
+            success: true,
+            message: "Task deleted!",
+        })
+
+    } catch (error) {
+
+        next(error)
+
+    }
 
 }

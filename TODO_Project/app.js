@@ -1,8 +1,9 @@
 import express from 'express';
-import {config} from 'dotenv';
+import { config } from 'dotenv';
 import userRouter from './routes/users.route.js';
 import taskRouter from './routes/tasks.route.js';
 import cookieParser from 'cookie-parser';
+import { errorMiddleware } from './middlewares/error.middleware.js';
 
 export const app = express();
 
@@ -31,3 +32,5 @@ app.use("/api/v1/tasks", taskRouter);
 app.get('/', (req, res) => {
     res.send("Server is running!");
 });
+
+app.use(errorMiddleware)

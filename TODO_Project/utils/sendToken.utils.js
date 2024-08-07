@@ -10,5 +10,6 @@ export const sendToken = (user, res, statusCode=200, message) => {
     }).json({
         success: true,
         message,
+        token,
     })
 }

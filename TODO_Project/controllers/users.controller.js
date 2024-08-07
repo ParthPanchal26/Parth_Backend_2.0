@@ -1,72 +1,96 @@
 import { User } from "../models/users.model.js";
 import bcrypt from 'bcrypt';
 import { sendToken } from "../utils/sendToken.utils.js";
+import errorHandler from "../middlewares/error.middleware.js";
 
-export const register = async (req, res) => {
+export const register = async (req, res, next) => {
 
-    const { name, email, password } = req.body;
+    try {
 
-    let user = await User.findOne({
-        email,
-    })
+        const { name, email, password } = req.body;
 
-    if (user) return res.status(409).json({
-        success: false,
-        message: "User Already Exist!",
-    })
+        let user = await User.findOne({
+            email,
+        })
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+        if (user) return next(new errorHandler("User Already Exist!", 409))
 
-    user = await User.create({
-        name,
-        email,
-        password: hashedPassword
-    });
+        const hashedPassword = await bcrypt.hash(password, 10);
 
-    sendToken(user, res, 201, "User signedUp!")
+        user = await User.create({
+            name,
+            email,
+            password: hashedPassword
+        });
 
-}
+        sendToken(user, res, 201, "User signedUp!")
 
-export const login = async (req, res) => {
+    } catch (error) {
 
-    const { email, password } = req.body;
+        next(error)
 
-    const user = await User.findOne({
-        email,
-    }).select("+password");
-
-    if (!user) return res.status(404).json({
-        success: false,
-        message: "Invalid credentials!",
-    })
-
-    const isMatch = await bcrypt.compare(password, user.password);
-
-    if (!isMatch) return res.status(404).json({
-        success: false,
-        message: "Incorrect Password!",
-    })
-
-    sendToken(user, res, 200, `Welcome, ${user.name}`);
+    }
 
 }
 
-export const logout = (req, res) => {
+export const login = async (req, res, next) => {
 
-    res.status(200).cookie("token", "", {
-        expires: new Date(Date.now()),
-    }).json({
-        success: true,
-        message: "User deleted!",
-    })
+    try {
+
+        const { email, password } = req.body;
+
+        const user = await User.findOne({
+            email,
+        }).select("+password");
+
+        if (!user) return next(new errorHandler("Task not found", 404))
+
+        const isMatch = await bcrypt.compare(password, user.password);
+
+        if (!isMatch) return next(new errorHandler("Incorrect Password", 400))
+
+        sendToken(user, res, 200, `Welcome, ${user.name}`);
+
+    } catch (error) {
+
+        next(error)
+
+    }
 
 }
 
-export const getMyProfile = (req, res) => {
+export const logout = (req, res, next) => {
 
-    res.status(200).json({
-        success: true,
-        user: req.user,
-    });
+    try {
+
+        res.status(200).cookie("token", "", {
+            expires: new Date(Date.now()),
+        }).json({
+            success: true,
+            message: "User deleted!",
+        })
+
+    } catch (error) {
+
+        next(error)
+
+    }
+
+}
+
+export const getMyProfile = (req, res, next) => {
+
+    try {
+
+        res.status(200).json({
+            success: true,
+            user: req.user,
+        });
+
+    } catch (error) {
+
+        next(error)
+
+    }
 
 }
