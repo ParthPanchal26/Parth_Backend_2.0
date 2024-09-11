@@ -4,6 +4,7 @@ import userRouter from './routes/users.route.js';
 import taskRouter from './routes/tasks.route.js';
 import cookieParser from 'cookie-parser';
 import { errorMiddleware } from './middlewares/error.middleware.js';
+import cors from 'cors';
 
 export const app = express();
 
@@ -12,6 +13,13 @@ config({
 });
 
 app.use(express.json());
+app.use(cookieParser());
+app.use(cors({
+    origin: [process.env.FRONTEND_URI],
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true,
+})
+);
 
 // Initial order ...
 /*
@@ -24,7 +32,6 @@ app.use(express.json());
 // and req.cookies remains undefined.
 
 // Correct order ...
-app.use(cookieParser());
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/tasks", taskRouter);
 

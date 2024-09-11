@@ -7,5 +7,5 @@ const PORT = process.env.PORT;
 
 
 app.listen(PORT, (req, res) => {
-    console.log(`Server listening on http://localhost:${PORT}/`);
+    console.log(`Server listening on http://localhost:${PORT}/ in ${process.env.NODE_ENV} mode!`);
 });

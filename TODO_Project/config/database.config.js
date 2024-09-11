@@ -4,8 +4,8 @@ export const connectDB = async () => {
     await mongoose.connect(process.env.DATABASE_URI, {
         dbName: "TODO_Backend",
     })
-        .then(() => {
-            console.log("Database connected!");
+        .then((host) => {
+            console.log(`Database connected!: : ${host.connection.host}`);
         })
         .catch((err) => {
             console.log("DB connection Error: : " + err);
